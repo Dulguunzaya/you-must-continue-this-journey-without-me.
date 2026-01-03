@@ -2,15 +2,18 @@ import Button from "./Button";
 
 const Hero = () => {
   return (
-    <div className="flex justify-center items-center w-full h-screen bg-white animate-fade-in duration-200">
-      <div className="w-[500px] h-[650px] bg-gray-400 border-2 border-black rounded-lg">
-        <div className="text-center text-3xl pt-6">Automated Billiard</div>
-        <div className="flex justify-center items-center gap-5 mt-10">
+    <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-300 animate-fade-in">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 text-center transition-transform duration-300 hover:scale-[1.02]">
+        <h1 className="text-4xl font-extrabold text-gray-800 mb-2">
+          Automated Billiard
+        </h1>
+
+        <div className="flex justify-center gap-6">
           <Button name="Login" color="blue" link="/login" />
           <Button name="Register" color="gray" link="/register" />
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
