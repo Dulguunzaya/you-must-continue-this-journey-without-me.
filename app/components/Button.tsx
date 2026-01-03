@@ -1,10 +1,12 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 
 type ButtonProps = {
   name: string;
   color: "blue" | "gray" | "red" | "green";
+  link: string;
 };
 
 const colorClasses = {
@@ -14,10 +16,17 @@ const colorClasses = {
   green: "bg-green-500 hover:bg-green-600",
 };
 
-const Button: React.FC<ButtonProps> = ({ name, color }) => {
+const Button: React.FC<ButtonProps> = ({ name, color, link }) => {
+  const router = useRouter();
+
+  const handleClick = () => {
+    router.push(link);
+  };
+
   return (
     <button
-      className={`${colorClasses[color]} text-white font-bold py-2 px-4 rounded duration-200 transition-all animate-fade-in`}
+      onClick={handleClick}
+      className={`${colorClasses[color]} text-white font-bold py-2 px-4 rounded transition-all duration-200 animate-fade-in`}
     >
       {name}
     </button>
