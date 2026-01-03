@@ -9,18 +9,27 @@ const Page = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const user = {
-    username,
-    email,
-    password,
-  };
   const router = useRouter();
 
-  const handleClick = () => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (password !== confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    const user = {
+      username,
+      email,
+      password,
+    };
+
+    // ✅ localStorage ЗӨВХӨН client event дотор
+    localStorage.setItem("user", JSON.stringify(user));
+
     router.push("/login");
   };
-
-  const save = localStorage.setItem("user", JSON.stringify(user));
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-300">
@@ -29,7 +38,7 @@ const Page = () => {
           Register
         </h1>
 
-        <form className="space-y-6">
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
             <label className="block text-gray-700 mb-2 font-medium">
               Username
@@ -38,7 +47,7 @@ const Page = () => {
               type="text"
               placeholder="Enter your username"
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 text-black py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition"
+              className="w-full px-4 text-black py-3 border rounded-lg"
               required
             />
           </div>
@@ -50,7 +59,7 @@ const Page = () => {
             <input
               type="email"
               placeholder="Enter your email"
-              className="w-full px-4 py-3 border text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition"
+              className="w-full px-4 py-3 border text-black rounded-lg"
               required
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -63,7 +72,7 @@ const Page = () => {
             <input
               type="password"
               placeholder="Create a password"
-              className="w-full px-4 py-3 text-black border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition"
+              className="w-full px-4 py-3 text-black border rounded-lg"
               required
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -76,7 +85,7 @@ const Page = () => {
             <input
               type="password"
               placeholder="Confirm your password"
-              className="w-full px-4 py-3 border text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition"
+              className="w-full px-4 py-3 border text-black rounded-lg"
               required
               onChange={(e) => setConfirmPassword(e.target.value)}
               value={confirmPassword}
@@ -85,10 +94,7 @@ const Page = () => {
 
           <button
             type="submit"
-            className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition duration-200"
-            onSelect={() => {
-              handleClick();
-            }}
+            className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg"
           >
             Create Account
           </button>
