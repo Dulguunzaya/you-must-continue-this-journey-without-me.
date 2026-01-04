@@ -1,6 +1,32 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 const Page = () => {
+  const router = useRouter();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const storedUser = localStorage.getItem("user");
+
+    if (!storedUser) {
+      alert("User бүртгэлгүй байна");
+      return;
+    }
+
+    const user = JSON.parse(storedUser);
+
+    if (username === user.username && password === user.password) {
+      router.push("/dashboard");
+    } else {
+      alert("Username эсвэл password буруу");
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-300">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 animate-fade-in">
@@ -8,7 +34,7 @@ const Page = () => {
           Login
         </h1>
 
-        <form className="space-y-6">
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
             <label className="block text-gray-700 mb-2 font-medium">
               Username
@@ -16,8 +42,9 @@ const Page = () => {
             <input
               type="text"
               placeholder="Enter your username"
-              className="w-full text-black px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+              className="w-full text-black px-4 py-3 border rounded-lg"
               required
+              onChange={(e) => setUsername(e.target.value)}
             />
           </div>
 
@@ -28,14 +55,15 @@ const Page = () => {
             <input
               type="password"
               placeholder="Enter your password"
-              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+              className="w-full px-4 py-3 border rounded-lg"
               required
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition duration-200"
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg"
           >
             Login
           </button>

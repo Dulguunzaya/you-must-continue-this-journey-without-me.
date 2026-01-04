@@ -19,15 +19,18 @@ const Page = () => {
       return;
     }
 
+    if (!email.endsWith("@muls.edu.mn")) {
+      alert("Зөвхөн muls.edu.mn и-мэйл ашиглана уу!");
+      return;
+    }
+
     const user = {
       username,
       email,
       password,
     };
 
-    // ✅ localStorage ЗӨВХӨН client event дотор
     localStorage.setItem("user", JSON.stringify(user));
-
     router.push("/login");
   };
 
@@ -46,9 +49,9 @@ const Page = () => {
             <input
               type="text"
               placeholder="Enter your username"
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 text-black py-3 border rounded-lg"
+              className="w-full px-4 py-3 border rounded-lg text-black"
               required
+              onChange={(e) => setUsername(e.target.value)}
             />
           </div>
 
@@ -59,7 +62,7 @@ const Page = () => {
             <input
               type="email"
               placeholder="Enter your email"
-              className="w-full px-4 py-3 border text-black rounded-lg"
+              className="w-full px-4 py-3 border rounded-lg text-black"
               required
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -72,7 +75,7 @@ const Page = () => {
             <input
               type="password"
               placeholder="Create a password"
-              className="w-full px-4 py-3 text-black border rounded-lg"
+              className="w-full px-4 py-3 border rounded-lg text-black"
               required
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -85,10 +88,10 @@ const Page = () => {
             <input
               type="password"
               placeholder="Confirm your password"
-              className="w-full px-4 py-3 border text-black rounded-lg"
+              className="w-full px-4 py-3 border rounded-lg text-black"
               required
-              onChange={(e) => setConfirmPassword(e.target.value)}
               value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
             />
           </div>
 

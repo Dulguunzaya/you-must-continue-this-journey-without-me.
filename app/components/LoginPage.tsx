@@ -1,6 +1,6 @@
 import Button from "./Button";
 
-const Hero = () => {
+const LoginPage = () => {
   return (
     <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-300 animate-fade-in">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 text-center transition-transform duration-300 hover:scale-[1.02]">
@@ -17,4 +17,4 @@ const Hero = () => {
   );
 };
 
-export default Hero;
+export default LoginPage;
