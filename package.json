@@ -2,16 +2,33 @@
   "name": "billiard",
   "version": "0.1.0",
   "private": true,
+  "description": "This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).",
+  "homepage": "https://github.com/Dulguunzaya/Billiard#readme",
+  "bugs": {
+    "url": "https://github.com/Dulguunzaya/Billiard/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dulguunzaya/Billiard.git"
+  },
+  "license": "ISC",
+  "author": "",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "server": "node app.js"
   },
   "dependencies": {
     "clsx": "^2.1.1",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "express-session": "^1.18.2",
+    "mongoose": "^9.1.1",
     "motion": "^12.23.26",
     "next": "16.1.1",
+    "nodemailer": "^7.0.12",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },

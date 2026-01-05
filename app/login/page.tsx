@@ -5,25 +5,37 @@ import { useState } from "react";
 
 const Page = () => {
   const router = useRouter();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
-    const storedUser = localStorage.getItem("user");
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (!storedUser) {
-      alert("User бүртгэлгүй байна");
-      return;
-    }
+      const data = await response.json();
 
-    const user = JSON.parse(storedUser);
-
-    if (username === user.username && password === user.password) {
-      router.push("/dashboard");
-    } else {
-      alert("Username эсвэл password буруу");
+      if (response.ok) {
+        alert(data.message);
+        router.push("/dashboard");
+      } else {
+        alert(data.message || "Нэвтрэх амжилтгүй боллоо");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Серверт холбогдоход алдаа гарлаа");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -37,35 +49,38 @@ const Page = () => {
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
             <label className="block text-gray-700 mb-2 font-medium">
-              Username
+              И-мэйл
             </label>
             <input
-              type="text"
-              placeholder="Enter your username"
+              type="email"
+              placeholder="И-мэйл хаягаа оруулна уу"
               className="w-full text-black px-4 py-3 border rounded-lg"
               required
-              onChange={(e) => setUsername(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
           <div>
             <label className="block text-gray-700 mb-2 font-medium">
-              Password
+              Нууц үг
             </label>
             <input
               type="password"
-              placeholder="Enter your password"
+              placeholder="Нууц үгээ оруулна уу"
               className="w-full px-4 py-3 border rounded-lg"
               required
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg"
+            disabled={loading}
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg disabled:opacity-50"
           >
-            Login
+            {loading ? "Нэвтэрч байна..." : "Нэвтрэх"}
           </button>
         </form>
 

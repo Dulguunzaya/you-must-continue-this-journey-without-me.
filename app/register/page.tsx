@@ -4,34 +4,52 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 const Page = () => {
-  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
+      alert("Нууц үг таарахгүй байна");
       return;
     }
 
-    if (!email.endsWith("@muls.edu.mn")) {
-      alert("Зөвхөн muls.edu.mn и-мэйл ашиглана уу!");
-      return;
+    // if (!email.endsWith("@muls.edu.mn")) {
+    //   alert("Зөвхөн muls.edu.mn и-мэйл ашиглана уу!");
+    //   return;
+    // }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(data.message);
+        router.push("/verify-otp?email=" + encodeURIComponent(email));
+      } else {
+        alert(data.message || "Бүртгэл амжилтгүй боллоо");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Серверт холбогдоход алдаа гарлаа");
+    } finally {
+      setLoading(false);
     }
-
-    const user = {
-      username,
-      email,
-      password,
-    };
-
-    localStorage.setItem("user", JSON.stringify(user));
-    router.push("/login");
   };
 
   return (
@@ -43,27 +61,27 @@ const Page = () => {
 
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
-            <label className="block text-gray-700 mb-2 font-medium">
-              Username
-            </label>
+            <label className="block text-gray-700 mb-2 font-medium">Нэр</label>
             <input
               type="text"
-              placeholder="Enter your username"
+              placeholder="Нэрээ оруулна уу"
               className="w-full px-4 py-3 border rounded-lg text-black"
               required
-              onChange={(e) => setUsername(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
           </div>
 
           <div>
             <label className="block text-gray-700 mb-2 font-medium">
-              Email
+              И-мэйл
             </label>
             <input
               type="email"
-              placeholder="Enter your email"
+              placeholder="И-мэйл хаягаа оруулна уу (@muls.edu.mn)"
               className="w-full px-4 py-3 border rounded-lg text-black"
               required
+              value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
@@ -97,9 +115,10 @@ const Page = () => {
 
           <button
             type="submit"
-            className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg"
+            disabled={loading}
+            className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg disabled:opacity-50"
           >
-            Create Account
+            {loading ? "Бүртгэж байна..." : "Бүртгүүлэх"}
           </button>
         </form>
 

@@ -1,0 +1,2 @@
+mongodb+srv://Dulguunzaya:<db_password>@cluster0.4emxqun.mongodb.net/?appName=Cluster0
+fqpprdhbwvogsgku
