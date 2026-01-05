@@ -1,7 +1,9 @@
-const express = require("express");
-const session = require("express-session");
+import express from "express";
+import session from "express-session";
 import cors from "cors";
-const connectDB = require("./backend/db");
+import connectDB from "./backend/db.js";
+import authRoutes from "./routes/authRoutes.js";
+
 const app = express();
 
 connectDB();
@@ -19,7 +21,6 @@ app.use(
   })
 );
 
-const authRoutes = require("./routes/authRoutes");
 app.use("/api/auth", authRoutes);
 
 const PORT = 3000;
