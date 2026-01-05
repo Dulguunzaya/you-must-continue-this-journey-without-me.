@@ -1,16 +1,13 @@
 const express = require("express");
 const session = require("express-session");
-const cors = require("cors");
+import cors from "cors";
 const connectDB = require("./backend/db");
-
 const app = express();
 
 connectDB();
 
-app.use(cors({
-  origin: "http://localhost:3001",
-  credentials: true
-}));
+
+app.use(cors());
 
 app.use(express.json());
 
