@@ -1,23 +1,24 @@
-const mongoose = require('mongoose');
-const User = require('../models/user'); // Import the User model
+import mongoose from 'mongoose';
 
-const MONGO_URI = "mongodb+srv://Dulguunzaya:Dukduk019216@cluster0.4emxqun.mongodb.net/?appName=Cluster0";
+const MONGO_URI = process.env.MONGODB_URI || "mongodb+srv://Dulguunzaya:Dukduk019216@cluster0.4emxqun.mongodb.net/?appName=Cluster0";
+
+let isConnected = false;
 
 const connectDB = async () => {
+    if (isConnected) {
+        console.log('MongoDB already connected');
+        return;
+    }
+
     try {
-        // Connect to MongoDB
         await mongoose.connect(MONGO_URI);
+        isConnected = true;
         console.log('MongoDB Connected Successfully');
-        // Create the empty User collection
-        await User.createCollection();
-        console.log('User collection created successfully');
     } catch (err) {
         console.error('MongoDB Connection Failed:', err.message);
-        process.exit(1); // Exit the process with failure
+        throw err;
     }
 };
 
-connectDB();
-
-module.exports = connectDB;
+export default connectDB;
  
