@@ -29,7 +29,7 @@ const Page = () => {
 
     try {
       const response = await fetch(
-        "http://https://billiard-wine.vercel.app/register",
+        "https://billiard-wine.vercel.app/register",
         {
           method: "POST",
           headers: {
