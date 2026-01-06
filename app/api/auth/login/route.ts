@@ -35,9 +35,12 @@ export async function POST(req: NextRequest) {
             { status: 200 }
         );
     } catch (error) {
-        console.error(error);
+        console.error('Login error:', error);
         return NextResponse.json(
-            { message: 'Нэвтэрхэд алдаа гарлаа' },
+            { 
+                message: 'Нэвтэрхэд алдаа гарлаа',
+                error: error instanceof Error ? error.message : 'Unknown error'
+            },
             { status: 500 }
         );
     }

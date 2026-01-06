@@ -46,9 +46,12 @@ export async function POST(req: NextRequest) {
             { status: 201 }
         );
     } catch (error) {
-        console.error(error);
+        console.error('Registration error:', error);
         return NextResponse.json(
-            { message: 'Хэрэглэгчийг бүртгэхэд алдаа гарлаа' },
+            { 
+                message: 'Хэрэглэгчийг бүртгэхэд алдаа гарлаа',
+                error: error instanceof Error ? error.message : 'Unknown error'
+            },
             { status: 500 }
         );
     }

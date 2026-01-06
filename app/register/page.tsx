@@ -42,11 +42,17 @@ const Page = () => {
         alert(data.message);
         router.push("/verify-otp?email=" + encodeURIComponent(email));
       } else {
-        alert(data.message || "Бүртгэл амжилтгүй боллоо");
+        const errorMsg = data.error
+          ? `${data.message}: ${data.error}`
+          : data.message;
+        alert(errorMsg || "Бүртгэл амжилтгүй боллоо");
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Серверт холбогдоход алдаа гарлаа");
+      alert(
+        "Серверт холбогдоход алдаа гарлаа: " +
+          (error instanceof Error ? error.message : "Unknown error")
+      );
     } finally {
       setLoading(false);
     }
