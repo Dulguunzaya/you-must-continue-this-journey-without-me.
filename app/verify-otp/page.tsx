@@ -16,16 +16,13 @@ function VerifyOTPContent() {
     setLoading(true);
 
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/auth/verify-otp",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, otp }),
-        }
-      );
+      const response = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, otp }),
+      });
 
       const data = await response.json();
 
@@ -47,16 +44,13 @@ function VerifyOTPContent() {
     setLoading(true);
 
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/auth/resend-otp",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email }),
-        }
-      );
+      const response = await fetch("/api/auth/resend-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
 
       const data = await response.json();
 
