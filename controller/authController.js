@@ -24,9 +24,9 @@ exports.register = async (req, res) => {
         let user = await User.findOne({ email });
         if (user) return res.status(400).json({ message: 'Хэрэглэгч аль хэдийн бүртгэгдсэн байна' });
 
-        // if (!email || !email.trim().toLowerCase().endsWith("@muls.edu.mn")) {
-        //     return res.status(400).json({ message: 'Зөвхөн сургуулийн и-мэйл хаяг ашиглана уу!' });
-        // }
+        if (!email || !email.trim().toLowerCase().endsWith("@muls.edu.mn")) {
+            return res.status(400).json({ message: 'Зөвхөн сургуулийн и-мэйл хаяг ашиглана уу!' });
+        }
 
         const otp = generateOTP();
         const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
