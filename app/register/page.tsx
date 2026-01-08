@@ -15,10 +15,10 @@ const Page = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (password.length < 8) {
-      alert("Нууц үг хамгийн багадаа 8 үсэг байх шаардлагатай");
-      return;
-    }
+    // if (password.length < 8) {
+    //   alert("Нууц үг хамгийн багадаа 8 үсэг байх шаардлагатай");
+    //   return;
+    // }
 
     if (password !== confirmPassword) {
       alert("Нууц үг таарахгүй байна");
