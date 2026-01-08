@@ -20,10 +20,10 @@ const Page = () => {
       return;
     }
 
-    // if (!email.endsWith("@muls.edu.mn")) {
-    //   alert("Зөвхөн muls.edu.mn и-мэйл ашиглана уу!");
-    //   return;
-    // }
+    if (!email.endsWith("@muls.edu.mn")) {
+      alert("Зөвхөн muls.edu.mn и-мэйл ашиглана уу!");
+      return;
+    }
 
     setLoading(true);
 
