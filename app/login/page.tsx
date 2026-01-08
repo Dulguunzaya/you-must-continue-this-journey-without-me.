@@ -16,9 +16,7 @@ const Page = () => {
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ email, password }),
       });
@@ -32,7 +30,7 @@ const Page = () => {
         alert(data.message || "Нэвтрэх амжилтгүй боллоо");
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error(error);
       alert("Серверт холбогдоход алдаа гарлаа");
     } finally {
       setLoading(false);
@@ -40,21 +38,26 @@ const Page = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-300">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 animate-fade-in">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
-          Login
+    <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f2027] via-[#203a43] to-[#2c5364] relative overflow-hidden">
+      <div className="absolute w-[500px] h-[500px] bg-green-500/20 blur-3xl rounded-full -top-40 -left-40" />
+      <div className="absolute w-[400px] h-[400px] bg-blue-500/20 blur-3xl rounded-full bottom-0 right-0" />
+
+      <div className="relative w-full max-w-md backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl shadow-2xl p-10 animate-fade-in">
+        <h1 className="text-4xl font-extrabold text-center mb-2 bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">
+          Automated Billiard
         </h1>
+
+        <p className="text-center text-gray-300 text-sm mb-8">
+          Smart • Fast • Cashless 🎱
+        </p>
 
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
-            <label className="block text-gray-700 mb-2 font-medium">
-              И-мэйл
-            </label>
+            <label className="block text-gray-200 mb-2 text-sm">И-мэйл</label>
             <input
               type="email"
-              placeholder="И-мэйл хаягаа оруулна уу"
-              className="w-full text-black px-4 py-3 border rounded-lg"
+              placeholder="email@example.com"
+              className="w-full px-4 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/20 focus:outline-none focus:ring-2 focus:ring-green-400"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -62,13 +65,11 @@ const Page = () => {
           </div>
 
           <div>
-            <label className="block text-gray-700 mb-2 font-medium">
-              Нууц үг
-            </label>
+            <label className="block text-gray-200 mb-2 text-sm">Нууц үг</label>
             <input
               type="password"
-              placeholder="Нууц үгээ оруулна уу"
-              className="w-full px-4 py-3 border rounded-lg"
+              placeholder="••••••••"
+              className="w-full px-4 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/20 focus:outline-none focus:ring-2 focus:ring-green-400"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -78,20 +79,23 @@ const Page = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg disabled:opacity-50"
+            className="w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-green-400 to-emerald-500 shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-green-400/40 disabled:opacity-50"
           >
             {loading ? "Нэвтэрч байна..." : "Нэвтрэх"}
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-600 mt-6">
-          Don’t have an account?{" "}
-          <a href="/register" className="text-blue-500 hover:underline">
+        <p className="text-center text-sm text-gray-300 mt-6">
+          Бүртгэлгүй юу?{" "}
+          <a
+            href="/register"
+            className="text-green-400 hover:underline font-medium"
+          >
             Register
           </a>
         </p>
       </div>
-    </div>
+    </section>
   );
 };
 
