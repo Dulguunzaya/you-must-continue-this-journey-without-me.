@@ -65,7 +65,7 @@ const DashboardPage = () => {
       </div>
 
       <footer className="relative z-10 text-center text-gray-400 text-sm pb-6">
-        2026 Automated Billiard
+        © 2026 Automated Billiard 🎱
       </footer>
     </section>
   );
