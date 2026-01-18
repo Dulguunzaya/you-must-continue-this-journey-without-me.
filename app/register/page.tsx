@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../contexts/AuthContext";
 
 const Page = () => {
   const [name, setName] = useState("");
@@ -10,6 +11,7 @@ const Page = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const { login } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,15 +43,13 @@ const Page = () => {
 
       const data = await response.json();
 
-      if (response.ok) {
-        alert(data.message);
-        router.push("/verify-otp?email=" + encodeURIComponent(email));
-      } else {
-        const errorMsg = data.error
-          ? `${data.message}: ${data.error}`
-          : data.message;
-        alert(errorMsg || "Бүртгэл амжилтгүй боллоо");
+      if (!response.ok) {
+        alert(data.message || "Бүртгэл амжилтгүй боллоо");
+        return;
       }
+
+      alert(data.message);
+      router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`);
     } catch (error) {
       console.error(error);
       alert("Серверт холбогдоход алдаа гарлаа");

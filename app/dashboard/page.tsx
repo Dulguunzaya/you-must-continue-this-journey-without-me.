@@ -1,8 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../contexts/AuthContext";
 
 const DashboardPage = () => {
+  const { user, logout } = useAuth();
+  const router = useRouter();
+  const isLoggedIn = !!user;
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
+
   return (
     <section className="min-h-screen bg-gradient-to-br from-[#0f2027] via-[#203a43] to-[#2c5364] relative overflow-hidden">
       <div className="absolute w-[500px] h-[500px] bg-green-500/20 blur-3xl rounded-full -top-40 -left-40" />
@@ -14,18 +25,32 @@ const DashboardPage = () => {
         </h1>
 
         <div className="flex gap-4">
-          <Link
-            href="/login"
-            className="px-5 py-2 rounded-xl border border-white/30 text-white hover:bg-white/10 transition"
-          >
-            Login
-          </Link>
-          <Link
-            href="/register"
-            className="px-5 py-2 rounded-xl bg-gradient-to-r from-green-400 to-emerald-500 text-white font-semibold shadow hover:shadow-green-400/40 transition"
-          >
-            Register
-          </Link>
+          {!isLoggedIn ? (
+            <>
+              <Link
+                href="/login"
+                className="px-5 py-2 rounded-xl border border-white/30 text-white hover:bg-white/10 transition"
+              >
+                Login
+              </Link>
+              <Link
+                href="/register"
+                className="px-5 py-2 rounded-xl bg-gradient-to-r from-green-400 to-emerald-500 text-white font-semibold shadow hover:shadow-green-400/40 transition"
+              >
+                Register
+              </Link>
+            </>
+          ) : (
+            <>
+              <span className="px-5 py-2 text-white">{user.name}</span>
+              <button
+                onClick={handleLogout}
+                className="px-5 py-2 rounded-xl border border-white/30 text-white hover:bg-red-500/20 hover:border-red-400 transition"
+              >
+                Гарах
+              </button>
+            </>
+          )}
         </div>
       </nav>
 

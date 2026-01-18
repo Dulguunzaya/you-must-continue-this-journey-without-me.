@@ -2,11 +2,13 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
+import { useAuth } from "../contexts/AuthContext";
 
 function VerifyOTPContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
+  const { login } = useAuth();
 
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,7 +30,16 @@ function VerifyOTPContent() {
 
       if (response.ok) {
         alert(data.message);
-        router.push("/login");
+
+        if (data.token && data.user) {
+          login(
+            { id: data.user.id, name: data.user.name, email: data.user.email },
+            data.token
+          );
+          router.push("/dashboard");
+        } else {
+          router.push("/login");
+        }
       } else {
         alert(data.message || "OTP баталгаажуулалт амжилтгүй боллоо");
       }

@@ -6,7 +6,9 @@ const UserSchema = new mongoose.Schema({
     password: { type: String, required: true },
     otp: { type: String },
     otpExpiry: { type: Date },
-    isVerified: { type: Boolean, default: false }
+    isVerified: { type: Boolean, default: false },
+    resetPasswordOTP: { type: String },
+    resetPasswordOTPExpiry: { type: Date }
 });
 
 const User = mongoose.models.User || mongoose.model('User', UserSchema);

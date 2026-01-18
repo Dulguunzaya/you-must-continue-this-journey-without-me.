@@ -1,37 +1,68 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/backend/db';
 import User from '@/models/user';
+import { comparePassword, generateToken, validateEmail } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
     try {
         await connectDB();
         
         const { email, password } = await req.json();
-        const user = await User.findOne({ email });
 
-        if (!user) {
+        if (!email || !password) {
             return NextResponse.json(
-                { message: 'Хэрэглэгч олдсонгүй' },
+                { message: 'И-мэйл болон нууц үг шаардлагатай' },
                 { status: 400 }
             );
         }
 
-        if (user.password !== password) {
+        if (!validateEmail(email)) {
             return NextResponse.json(
-                { message: 'Нууц үг буруу байна' },
+                { message: 'И-мэйл хаяг буруу байна' },
                 { status: 400 }
+            );
+        }
+
+        const user = await User.findOne({ email: email.toLowerCase().trim() });
+
+        if (!user) {
+            return NextResponse.json(
+                { message: 'И-мэйл эсвэл нууц үг буруу байна' },
+                { status: 401 }
+            );
+        }
+
+        const isPasswordValid = await comparePassword(password, user.password);
+        if (!isPasswordValid) {
+            return NextResponse.json(
+                { message: 'И-мэйл эсвэл нууц үг буруу байна' },
+                { status: 401 }
             );
         }
 
         if (!user.isVerified) {
             return NextResponse.json(
-                { message: 'И-мэйл баталгаажаагүй байна. OTP-г баталгаажуулна уу.' },
-                { status: 400 }
+                { message: 'И-мэйл баталгаажаагүй байна. OTP-г баталгаажуулна уу.', needsVerification: true, email: user.email },
+                { status: 403 }
             );
         }
 
+        const token = generateToken({
+            userId: user._id.toString(),
+            email: user.email,
+            name: user.name
+        });
+
         return NextResponse.json(
-            { message: 'Нэвтэрсэн', user: { id: user._id, email: user.email, name: user.name } },
+            { 
+                message: 'Амжилттай нэвтэрлээ', 
+                token,
+                user: { 
+                    id: user._id.toString(), 
+                    email: user.email, 
+                    name: user.name 
+                } 
+            },
             { status: 200 }
         );
     } catch (error) {

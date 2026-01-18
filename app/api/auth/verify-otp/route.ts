@@ -1,18 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/backend/db';
 import User from '@/models/user';
+import { generateToken } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
     try {
         await connectDB();
         
         const { email, otp } = await req.json();
-        const user = await User.findOne({ email });
+
+        if (!email || !otp) {
+            return NextResponse.json(
+                { message: 'И-мэйл болон OTP шаардлагатай' },
+                { status: 400 }
+            );
+        }
+
+        const user = await User.findOne({ email: email.toLowerCase().trim() });
 
         if (!user) {
             return NextResponse.json(
                 { message: 'Хэрэглэгч олдсонгүй' },
-                { status: 400 }
+                { status: 404 }
             );
         }
 
@@ -23,9 +32,23 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        if (user.otp !== otp || !user.otpExpiry || user.otpExpiry < new Date()) {
+        if (!user.otp || !user.otpExpiry) {
             return NextResponse.json(
-                { message: 'OTP буруу эсвэл хугацаа нь дууссан байна' },
+                { message: 'OTP хүчинтэй байхгүй байна. Дахин илгээнэ үү.' },
+                { status: 400 }
+            );
+        }
+
+        if (user.otpExpiry < new Date()) {
+            return NextResponse.json(
+                { message: 'OTP-ийн хугацаа дууссан байна. Дахин илгээнэ үү.' },
+                { status: 400 }
+            );
+        }
+
+        if (user.otp !== otp.trim()) {
+            return NextResponse.json(
+                { message: 'OTP буруу байна' },
                 { status: 400 }
             );
         }
@@ -35,8 +58,22 @@ export async function POST(req: NextRequest) {
         user.otpExpiry = undefined;
         await user.save();
 
+        const token = generateToken({
+            userId: user._id.toString(),
+            email: user.email,
+            name: user.name
+        });
+
         return NextResponse.json(
-            { message: 'И-мэйл амжилттай баталгаажлаа. Одоо нэвтэрч болно.' },
+            { 
+                message: 'И-мэйл амжилттай баталгаажлаа!',
+                token,
+                user: {
+                    id: user._id.toString(),
+                    email: user.email,
+                    name: user.name
+                }
+            },
             { status: 200 }
         );
     } catch (error) {
