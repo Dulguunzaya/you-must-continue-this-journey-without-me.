@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../../app/contexts/AuthContext";
 
 const DashboardPage = () => {
   const { user, logout } = useAuth();
