@@ -34,7 +34,7 @@ function VerifyOTPContent() {
         if (data.token && data.user) {
           login(
             { id: data.user.id, name: data.user.name, email: data.user.email },
-            data.token
+            data.token,
           );
           router.push("/dashboard");
         } else {

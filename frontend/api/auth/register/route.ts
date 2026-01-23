@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/backend/db';
-import User from '@/models/user';
+import User from '@/backend/models/user';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
-import { hashPassword, generateToken, validateEmail, validatePassword } from '@/lib/auth';
+import { hashPassword, generateToken, validateEmail, validatePassword } from '@/backend/lib/auth';
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',

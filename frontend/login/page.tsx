@@ -1,55 +1,47 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 
 const Page = () => {
-  const [name, setName] = useState("");
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const { login } = useAuth();
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (password.length < 8) {
-      alert("Нууц үг хамгийн багадаа 8 үсэг байх шаардлагатай");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      alert("Нууц үг таарахгүй байна");
-      return;
-    }
-
-    if (!email.endsWith("@muls.edu.mn")) {
-      alert("Зөвхөн muls.edu.mn и-мэйл ашиглана уу!");
-      return;
-    }
-
     setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/register", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.message || "Бүртгэл амжилтгүй боллоо");
+        if (data.needsVerification && data.email) {
+          alert(data.message);
+          router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`);
+          return;
+        }
+        alert(data.message || "Нэвтрэх амжилтгүй боллоо");
         return;
       }
 
-      alert(data.message);
-      router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`);
+      if (data.token && data.user) {
+        login(
+          { id: data.user.id, name: data.user.name, email: data.user.email },
+          data.token,
+        );
+        router.push("/dashboard");
+      }
     } catch (error) {
       console.error(error);
       alert("Серверт холбогдоход алдаа гарлаа");
@@ -65,31 +57,19 @@ const Page = () => {
 
       <div className="relative w-full max-w-md backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl shadow-2xl p-10 animate-fade-in">
         <h1 className="text-4xl font-extrabold text-center mb-2 bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">
-          Create Account
+          Automated Billiard
         </h1>
 
         <p className="text-center text-gray-300 text-sm mb-8">
-          Automated Billiard 🎱
+          Smart • Fast • Cashless 🎱
         </p>
 
-        <form className="space-y-5" onSubmit={handleSubmit}>
-          <div>
-            <label className="block text-gray-200 mb-2 text-sm">Нэр</label>
-            <input
-              type="text"
-              placeholder="Таны нэр"
-              className="w-full px-4 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/20 focus:outline-none focus:ring-2 focus:ring-green-400"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
             <label className="block text-gray-200 mb-2 text-sm">И-мэйл</label>
             <input
               type="email"
-              placeholder="name@muls.edu.mn"
+              placeholder="email@example.com"
               className="w-full px-4 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/20 focus:outline-none focus:ring-2 focus:ring-green-400"
               required
               value={email}
@@ -109,36 +89,31 @@ const Page = () => {
             />
           </div>
 
-          <div>
-            <label className="block text-gray-200 mb-2 text-sm">
-              Нууц үг давтах
-            </label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              className="w-full px-4 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/20 focus:outline-none focus:ring-2 focus:ring-green-400"
-              required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-          </div>
-
           <button
             type="submit"
             disabled={loading}
             className="w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-green-400 to-emerald-500 shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-green-400/40 disabled:opacity-50"
           >
-            {loading ? "Бүртгэж байна..." : "Бүртгүүлэх"}
+            {loading ? "Нэвтэрч байна..." : "Нэвтрэх"}
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-300 mt-6">
-          Аль хэдийн бүртгэлтэй юу?{" "}
+        <div className="text-center mt-4">
           <a
-            href="/login"
+            href="/forgot-password"
+            className="text-sm text-gray-300 hover:text-green-400 transition"
+          >
+            Нууц үгээ мартсан уу?
+          </a>
+        </div>
+
+        <p className="text-center text-sm text-gray-300 mt-6">
+          Бүртгэлгүй юу?{" "}
+          <a
+            href="/register"
             className="text-green-400 hover:underline font-medium"
           >
-            Login
+            Register
           </a>
         </p>
       </div>
