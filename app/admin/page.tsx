@@ -223,7 +223,7 @@ export default function AdminDashboard() {
                         onClick={() => handleStopTable(table._id)}
                         className="bg-orange-600 text-white px-3 py-1 rounded text-sm hover:bg-orange-700 transition-colors"
                       >
-                        Stop
+                        Stop.
                       </button>
                     )}
                     {table.status !== "PLAYING" && (
