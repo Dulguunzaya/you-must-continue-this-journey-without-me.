@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../app/contexts/AuthContext";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 
 interface Table {
   _id: string;
   name: string;
   status: "AVAILABLE" | "PLAYING" | "DISABLED";
-  pricePerMinute: number;
+  pricePerHour: number;
 }
 
 interface ActiveSession {
@@ -21,7 +21,7 @@ interface ActiveSession {
 }
 
 const DashboardPage = () => {
-  const { user, token, logout } = useAuth();
+  const { user, token, logout, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const [tables, setTables] = useState<Table[]>([]);
   const [activeSession, setActiveSession] = useState<ActiveSession | null>(
@@ -29,13 +29,40 @@ const DashboardPage = () => {
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [elapsed, setElapsed] = useState({ hours: 0, minutes: 0, seconds: 0 });
+  const [liveCost, setLiveCost] = useState(0);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const startTimer = useCallback((startTime: string) => {
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    const tick = () => {
+      const diffMs = Date.now() - new Date(startTime).getTime();
+      const totalSec = Math.floor(diffMs / 1000);
+      const hours = Math.floor(totalSec / 3600);
+      const minutes = Math.floor((totalSec % 3600) / 60);
+      const seconds = totalSec % 60;
+      setElapsed({ hours, minutes, seconds });
+      setLiveCost(Math.round((totalSec / 3600) * 20000));
+    };
+
+    tick();
+    timerRef.current = setInterval(tick, 1000);
+  }, []);
 
   useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/login");
+      return;
+    }
     if (user) {
       fetchAvailableTables();
       fetchActiveSession();
     }
-  }, [user]);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [user, authLoading, router]);
 
   const fetchAvailableTables = async () => {
     try {
@@ -69,7 +96,8 @@ const DashboardPage = () => {
       if (response.ok) {
         const data = await response.json();
         if (data.session) {
-          setActiveSession(data);
+          setActiveSession(data.session);
+          startTimer(data.session.startTime);
         }
       }
     } catch (err) {
@@ -113,6 +141,9 @@ const DashboardPage = () => {
       }
 
       setActiveSession(null);
+      if (timerRef.current) clearInterval(timerRef.current);
+      setElapsed({ hours: 0, minutes: 0, seconds: 0 });
+      setLiveCost(0);
       await fetchAvailableTables();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to stop session");
@@ -124,12 +155,8 @@ const DashboardPage = () => {
     router.push("/");
   };
 
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Please login to access dashboard</div>
-      </div>
-    );
+  if (authLoading || !user) {
+    return null;
   }
 
   return (
@@ -164,33 +191,51 @@ const DashboardPage = () => {
       <div className="relative z-10 max-w-6xl mx-auto px-6 pb-20">
         {/* Active Session Section */}
         {activeSession && (
-          <div className="mb-8 backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-6">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              Active Session
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="mb-8 backdrop-blur-xl bg-white/10 border border-emerald-400/30 rounded-3xl p-6 shadow-lg shadow-emerald-400/10">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-white">Active Session</h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
               <div>
-                <p className="text-gray-300 text-sm">Table</p>
+                <p className="text-gray-400 text-xs uppercase tracking-wider">
+                  Table
+                </p>
                 <p className="text-white text-lg font-semibold">
                   {activeSession.tableId.name}
                 </p>
               </div>
               <div>
-                <p className="text-gray-300 text-sm">Duration</p>
-                <p className="text-white text-lg font-semibold">
-                  {activeSession.durationInMinutes} min
+                <p className="text-gray-400 text-xs uppercase tracking-wider">
+                  Elapsed
+                </p>
+                <p className="text-white text-3xl font-mono font-bold tabular-nums">
+                  {String(elapsed.hours).padStart(2, "0")}:
+                  {String(elapsed.minutes).padStart(2, "0")}:
+                  {String(elapsed.seconds).padStart(2, "0")}
                 </p>
               </div>
               <div>
-                <p className="text-gray-300 text-sm">Current Cost</p>
+                <p className="text-gray-400 text-xs uppercase tracking-wider">
+                  Current Cost
+                </p>
+                <p className="text-emerald-400 text-3xl font-bold tabular-nums">
+                  {liveCost.toLocaleString()}₮
+                </p>
+              </div>
+              <div>
+                <p className="text-gray-400 text-xs uppercase tracking-wider">
+                  Rate
+                </p>
                 <p className="text-white text-lg font-semibold">
-                  ${activeSession.currentCost.toFixed(2)}
+                  20,000₮ / цаг
                 </p>
               </div>
             </div>
+
             <button
               onClick={handleStopSession}
-              className="mt-4 px-6 py-2 rounded-xl bg-gradient-to-r from-red-400 to-red-500 text-white font-semibold shadow hover:shadow-red-400/40 transition"
+              className="px-6 py-2 rounded-xl bg-gradient-to-r from-red-400 to-red-500 text-white font-semibold shadow hover:shadow-red-400/40 hover:scale-[1.02] transition"
             >
               Stop Session
             </button>
@@ -227,7 +272,7 @@ const DashboardPage = () => {
                     {table.name}
                   </h3>
                   <p className="text-gray-300 mb-4">
-                    ${table.pricePerMinute}/minute
+                    {(table.pricePerHour ?? 20000).toLocaleString()}₮ / цаг
                   </p>
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mb-4">
                     AVAILABLE

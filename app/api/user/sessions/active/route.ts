@@ -1,26 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
+import connectDB from '@/backend/db';
+import Session from '@/models/session';
+import Table from '@/models/table';
+import { authenticateRequest } from '@/lib/apiAuth';
 
-export async function GET(request: NextRequest) {
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/sessions/active`, {
-      method: 'GET',
-      headers: {
-        'Authorization': request.headers.get('Authorization') || '',
-        'Content-Type': 'application/json',
-      },
-    });
+// GET /api/user/sessions/active — get current user's active session
+export async function GET(req: NextRequest) {
+    const auth = authenticateRequest(req);
+    if (auth instanceof NextResponse) return auth;
 
-    const data = await response.json();
-    
-    if (!response.ok) {
-      return NextResponse.json(data, { status: response.status });
+    try {
+        await connectDB();
+
+        const activeSession = await Session.findOne({
+            userId: auth.userId,
+            isActive: true
+        }).populate('tableId');
+
+        if (!activeSession) {
+            return NextResponse.json({ session: null });
+        }
+
+        const table = activeSession.tableId as any;
+        const durationMs = Date.now() - new Date(activeSession.startTime).getTime();
+        const durationInMinutes = Math.round(durationMs / 60000);
+        const pricePerHour = table?.pricePerHour || 20000;
+        const currentCost = Math.round((durationInMinutes / 60) * pricePerHour);
+
+        return NextResponse.json({
+            session: {
+                _id: activeSession._id,
+                tableId: table,
+                startTime: activeSession.startTime,
+                durationInMinutes,
+                currentCost
+            }
+        });
+    } catch (error) {
+        return NextResponse.json({ message: 'Идэвхтэй тоглолт авахад алдаа гарлаа' }, { status: 500 });
     }
-
-    return NextResponse.json(data);
-  } catch (error) {
-    return NextResponse.json(
-      { message: 'Internal server error' },
-      { status: 500 }
-    );
-  }
 }

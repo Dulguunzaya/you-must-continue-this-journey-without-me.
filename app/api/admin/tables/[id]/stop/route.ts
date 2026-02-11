@@ -4,38 +4,7 @@ import Table from '@/models/table';
 import Session from '@/models/session';
 import { authenticateAdmin } from '@/lib/apiAuth';
 
-// DELETE /api/admin/tables/[id] — delete a table (admin only)
-export async function DELETE(
-    req: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
-) {
-    const auth = authenticateAdmin(req);
-    if (auth instanceof NextResponse) return auth;
-
-    try {
-        await connectDB();
-        const { id } = await params;
-
-        const table = await Table.findById(id);
-        if (!table) {
-            return NextResponse.json({ message: 'Ширээ олдсонгүй' }, { status: 404 });
-        }
-
-        if (table.status === 'PLAYING') {
-            return NextResponse.json(
-                { message: 'Тоглож байгаа ширээг устгах боломжгүй. Эхлээд зогсооно уу.' },
-                { status: 400 }
-            );
-        }
-
-        await Table.findByIdAndDelete(id);
-        return NextResponse.json({ message: 'Ширээ амжилттай устгагдлаа' });
-    } catch (error) {
-        return NextResponse.json({ message: 'Ширээ устгахад алдаа гарлаа' }, { status: 500 });
-    }
-}
-
-// POST /api/admin/tables/[id] — force stop a table session (admin only)
+// POST /api/admin/tables/[id]/stop — force stop a table session (admin only)
 export async function POST(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -60,7 +29,7 @@ export async function POST(
         if (activeSession) {
             activeSession.isActive = false;
             activeSession.endTime = new Date();
-            const durationMs = activeSession.endTime.getTime() - activeSession.startTime.getTime();
+            const durationMs = activeSession.endTime.getTime() - new Date(activeSession.startTime).getTime();
             const durationMin = durationMs / 60000;
             const pricePerHour = table.pricePerHour || 20000;
             activeSession.totalCost = Math.round((durationMin / 60) * pricePerHour);

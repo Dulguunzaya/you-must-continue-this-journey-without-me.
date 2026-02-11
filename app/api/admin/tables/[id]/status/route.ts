@@ -1,32 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
+import connectDB from '@/backend/db';
+import Table from '@/models/table';
+import { authenticateAdmin } from '@/lib/apiAuth';
 
+// PATCH /api/admin/tables/[id]/status — toggle AVAILABLE / DISABLED (admin only)
 export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const body = await request.json();
+    const auth = authenticateAdmin(req);
+    if (auth instanceof NextResponse) return auth;
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/tables/${params.id}/status`, {
-      method: 'PATCH',
-      headers: {
-        'Authorization': request.headers.get('Authorization') || '',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
+    try {
+        await connectDB();
+        const { id } = await params;
 
-    const data = await response.json();
-    
-    if (!response.ok) {
-      return NextResponse.json(data, { status: response.status });
+        const table = await Table.findById(id);
+        if (!table) {
+            return NextResponse.json({ message: 'Ширээ олдсонгүй' }, { status: 404 });
+        }
+
+        if (table.status === 'PLAYING') {
+            return NextResponse.json(
+                { message: 'Тоглож байгаа ширээний төлөв өөрчлөх боломжгүй' },
+                { status: 400 }
+            );
+        }
+
+        table.status = table.status === 'AVAILABLE' ? 'DISABLED' : 'AVAILABLE';
+        await table.save();
+
+        return NextResponse.json(table);
+    } catch (error) {
+        return NextResponse.json({ message: 'Төлөв өөрчлөхөд алдаа гарлаа' }, { status: 500 });
     }
-
-    return NextResponse.json(data);
-  } catch (error) {
-    return NextResponse.json(
-      { message: 'Internal server error' },
-      { status: 500 }
-    );
-  }
 }

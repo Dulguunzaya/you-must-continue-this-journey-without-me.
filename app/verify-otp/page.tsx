@@ -33,7 +33,12 @@ function VerifyOTPContent() {
 
         if (data.token && data.user) {
           login(
-            { id: data.user.id, name: data.user.name, email: data.user.email },
+            {
+              id: data.user.id,
+              name: data.user.name,
+              email: data.user.email,
+              role: data.user.role,
+            },
             data.token,
           );
           router.push("/dashboard");

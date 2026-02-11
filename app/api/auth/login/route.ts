@@ -50,7 +50,8 @@ export async function POST(req: NextRequest) {
         const token = generateToken({
             userId: user._id.toString(),
             email: user.email,
-            name: user.name
+            name: user.name,
+            role: user.role || 'USER'
         });
 
         return NextResponse.json(
@@ -60,7 +61,8 @@ export async function POST(req: NextRequest) {
                 user: { 
                     id: user._id.toString(), 
                     email: user.email, 
-                    name: user.name 
+                    name: user.name,
+                    role: user.role || 'USER'
                 } 
             },
             { status: 200 }

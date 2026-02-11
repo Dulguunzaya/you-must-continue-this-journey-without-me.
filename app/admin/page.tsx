@@ -8,7 +8,7 @@ interface Table {
   _id: string;
   name: string;
   status: "AVAILABLE" | "PLAYING" | "DISABLED";
-  pricePerMinute: number;
+  pricePerHour: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -20,7 +20,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newTable, setNewTable] = useState({ name: "", pricePerMinute: "" });
+  const [newTableName, setNewTableName] = useState("");
 
   useEffect(() => {
     if (!user || user.role !== "ADMIN") {
@@ -54,8 +54,8 @@ export default function AdminDashboard() {
   const handleAddTable = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!newTable.name || !newTable.pricePerMinute) {
-      setError("Please fill all fields");
+    if (!newTableName.trim()) {
+      setError("Ширээний нэр оруулна уу");
       return;
     }
 
@@ -66,10 +66,7 @@ export default function AdminDashboard() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          name: newTable.name,
-          pricePerMinute: parseFloat(newTable.pricePerMinute),
-        }),
+        body: JSON.stringify({ name: newTableName.trim() }),
       });
 
       if (!response.ok) {
@@ -78,7 +75,7 @@ export default function AdminDashboard() {
       }
 
       setShowAddModal(false);
-      setNewTable({ name: "", pricePerMinute: "" });
+      setNewTableName("");
       fetchTables();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to add table");
@@ -167,7 +164,17 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="text-gray-600 hover:text-gray-900 border border-gray-300 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              ← Буцах
+            </button>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Admin Dashboard
+            </h1>
+          </div>
           <button
             onClick={() => setShowAddModal(true)}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
@@ -195,7 +202,8 @@ export default function AdminDashboard() {
                       {table.name}
                     </h3>
                     <p className="text-sm text-gray-500">
-                      Price: ${table.pricePerMinute}/minute
+                      Үнэ: {(table.pricePerHour ?? 20000).toLocaleString()}₮ /
+                      цаг
                     </p>
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -270,45 +278,24 @@ export default function AdminDashboard() {
                   <input
                     type="text"
                     id="name"
-                    value={newTable.name}
-                    onChange={(e) =>
-                      setNewTable({ ...newTable, name: e.target.value })
-                    }
+                    value={newTableName}
+                    onChange={(e) => setNewTableName(e.target.value)}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     placeholder="Table 1"
                     required
                   />
                 </div>
-                <div className="mb-4">
-                  <label
-                    className="block text-gray-700 text-sm font-bold mb-2"
-                    htmlFor="pricePerMinute"
-                  >
-                    Price Per Minute ($)
-                  </label>
-                  <input
-                    type="number"
-                    id="pricePerMinute"
-                    value={newTable.pricePerMinute}
-                    onChange={(e) =>
-                      setNewTable({
-                        ...newTable,
-                        pricePerMinute: e.target.value,
-                      })
-                    }
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    placeholder="0.50"
-                    step="0.01"
-                    min="0"
-                    required
-                  />
+                <div className="mb-4 bg-gray-100 rounded-lg px-4 py-3">
+                  <p className="text-sm font-semibold text-gray-700">
+                    Үнэ: 20,000₮ / цаг (fixed)
+                  </p>
                 </div>
                 <div className="flex justify-end space-x-2">
                   <button
                     type="button"
                     onClick={() => {
                       setShowAddModal(false);
-                      setNewTable({ name: "", pricePerMinute: "" });
+                      setNewTableName("");
                       setError("");
                     }}
                     className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors"

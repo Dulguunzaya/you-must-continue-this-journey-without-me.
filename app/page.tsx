@@ -1,7 +1,7 @@
-import DashboardPage from "./dashboard/page";
+import LoginPage from "./components/LoginPage";
 
 const Page = () => {
-  return <DashboardPage />;
+  return <LoginPage />;
 };
 
 export default Page;

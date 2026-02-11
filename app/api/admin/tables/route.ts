@@ -1,56 +1,59 @@
 import { NextRequest, NextResponse } from 'next/server';
-import adminRoutes from '../../../../backend/routes/admin.routes';
+import connectDB from '@/backend/db';
+import Table, { FIXED_PRICE_PER_HOUR } from '@/models/table';
+import { authenticateAdmin } from '@/lib/apiAuth';
 
-// This is a proxy route that forwards requests to the Express backend
-export async function GET(request: NextRequest) {
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/tables`, {
-      method: 'GET',
-      headers: {
-        'Authorization': request.headers.get('Authorization') || '',
-        'Content-Type': 'application/json',
-      },
-    });
+// GET /api/admin/tables — list all tables (admin only)
+export async function GET(req: NextRequest) {
+    const auth = authenticateAdmin(req);
+    if (auth instanceof NextResponse) return auth;
 
-    const data = await response.json();
-    
-    if (!response.ok) {
-      return NextResponse.json(data, { status: response.status });
+    try {
+        await connectDB();
+        const tables = await Table.find().sort({ name: 1 });
+        return NextResponse.json(tables);
+    } catch (error) {
+        return NextResponse.json(
+            { message: 'Ширээнүүдийг авахад алдаа гарлаа' },
+            { status: 500 }
+        );
     }
-
-    return NextResponse.json(data);
-  } catch (error) {
-    return NextResponse.json(
-      { message: 'Internal server error' },
-      { status: 500 }
-    );
-  }
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
+// POST /api/admin/tables — create a new table (admin only)
+// Price is ALWAYS fixed at 20,000₮/hour — any incoming price is ignored
+export async function POST(req: NextRequest) {
+    const auth = authenticateAdmin(req);
+    if (auth instanceof NextResponse) return auth;
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/tables`, {
-      method: 'POST',
-      headers: {
-        'Authorization': request.headers.get('Authorization') || '',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
+    try {
+        await connectDB();
+        const { name } = await req.json();
 
-    const data = await response.json();
-    
-    if (!response.ok) {
-      return NextResponse.json(data, { status: response.status });
+        if (!name || !name.trim()) {
+            return NextResponse.json(
+                { message: 'Ширээний нэр шаардлагатай' },
+                { status: 400 }
+            );
+        }
+
+        const existing = await Table.findOne({ name: name.trim() });
+        if (existing) {
+            return NextResponse.json(
+                { message: 'Энэ нэртэй ширээ аль хэдийн байна' },
+                { status: 409 }
+            );
+        }
+
+        const table = await Table.create({
+            name: name.trim(),
+            pricePerHour: FIXED_PRICE_PER_HOUR
+        });
+        return NextResponse.json(table, { status: 201 });
+    } catch (error) {
+        return NextResponse.json(
+            { message: 'Ширээ үүсгэхэд алдаа гарлаа' },
+            { status: 500 }
+        );
     }
-
-    return NextResponse.json(data, { status: 201 });
-  } catch (error) {
-    return NextResponse.json(
-      { message: 'Internal server error' },
-      { status: 500 }
-    );
-  }
 }
